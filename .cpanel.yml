@@ -1,12 +1,6 @@
 ---
 deployment:
   tasks:
-    # Baris ini menentukan path absolut ke folder proyek Anda di server.
-    # PASTIKAN PATH INI SESUAI DENGAN "Repository Path" DI SCREENSHOT ANDA.
-    - export DEPLOYPATH=/home/ptiunsulbarac/repositories/webptiunsulbar
-
-    # Perintah-perintah yang akan dijalankan di dalam folder proyek Anda.
-    - cd $DEPLOYPATH
     - /usr/local/bin/composer install --no-dev --optimize-autoloader
     - /usr/bin/php artisan migrate --force
     - /usr/bin/php artisan config:cache
