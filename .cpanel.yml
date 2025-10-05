@@ -1,4 +1,4 @@
 ---
 deployment:
   tasks:
-    - /bin/echo "Deployment test successful"
+    - /bin/echo "Testing"
