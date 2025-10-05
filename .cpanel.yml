@@ -1,29 +1,4 @@
+---
 deployment:
   tasks:
-    # Tentukan path deploy (ganti sesuai target)
-    - export DEPLOYPATH=/home/ptiunsulbarac/public_html/
-
-    # Hapus isi lama di folder tujuan (opsional, hati-hati kalau ada file custom)
-    - /bin/rm -rf $DEPLOYPATH/*
-
-    # Copy semua file dari repo ke folder tujuan
-    - /bin/cp -R /home/ptiunsulbarac/repositories/webptiunsulbar/* $DEPLOYPATH
-
-    # Copy juga file tersembunyi (seperti .htaccess)
-    - /bin/cp -R /home/ptiunsulbarac/repositories/webptiunsulbar/.[!.]* $DEPLOYPATH
-
-    # Masuk ke folder tujuan
-    - cd $DEPLOYPATH
-
-    # Install dependency Laravel
-    - /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader
-
-    # Set permission (opsional, tergantung server)
-    - /bin/chmod -R 755 storage bootstrap/cache
-    - /bin/chmod -R 775 storage bootstrap/cache
-
-    # Jalankan cache dan optimisasi Laravel
-    - php artisan config:clear
-    - php artisan config:cache
-    - php artisan route:cache
-    - php artisan view:cache
+    - /bin/echo "Deployment test successful"
