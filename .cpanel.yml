@@ -1,4 +1,6 @@
 ---
 deployment:
   tasks:
-    - /bin/echo "Testing"
+    - export DEPLOYPATH=/home/metrosul/public_html/sims.metrosulbar.com/
+    - /bin/cp -R * $DEPLOYPATH
+    - /bin/cp -R .env.example $DEPLOYPATH/.env
