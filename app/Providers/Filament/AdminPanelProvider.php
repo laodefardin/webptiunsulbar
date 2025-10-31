@@ -34,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('ptimanage')
+            // ->path('ptimanage')
             ->login()
             ->favicon(url('settings/01K6JA6M24GF5W0XHHP27Z1F17.png'))
             ->brandLogo(fn () => view('filament.admin.brand')) // <-- Menggunakan view kustom untuk logo
