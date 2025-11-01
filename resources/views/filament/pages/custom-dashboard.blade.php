@@ -4,12 +4,10 @@
         {{-- HEADER --}}
         <div class="flex items-center justify-between flex-wrap gap-3">
             <div class="flex flex-col">
-                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 leading-tight">
-                    Selamat Datang di Dashboard
-                </h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Program Studi Teknik Informatika – Universitas Sulawesi Barat
-                </p>
+                <h1 class="text-2xl font-bold">Selamat Datang, {{ auth()->user()->name ?? 'Administrator' }} 👋</h1>
+                <p class="text-sm opacity-90">
+                Program Studi Teknik Informatika – Universitas Sulawesi Barat
+            </p>
             </div>
 
             <div x-data="{ loading: false }" class="ml-auto flex items-center">
