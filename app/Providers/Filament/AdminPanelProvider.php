@@ -27,6 +27,8 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 
+use Illuminate\Contracts\Auth\Authenticatable;
+
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -113,4 +115,16 @@ View::composer(['filament.admin.brand', 'filament.admin.brand-name'], function (
         });
     }
 }
+
+
+public function canAccessPanel(Authenticatable $user): bool
+{
+    // Untuk sementara, izinkan semua user yang login mengakses panel admin
+    return true;
+
+    // Kalau mau lebih aman (hanya admin tertentu):
+    // return in_array($user->email, ['admin@ptiunsulbar.ac.id', 'superadmin@ptiunsulbar.ac.id']);
+}
+
+
 }
