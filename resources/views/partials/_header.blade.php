@@ -23,7 +23,7 @@
 <header class="bg-white shadow-lg sticky top-0 z-50">
     <!-- Main Header -->
     <div class="relative text-white bg-cover bg-center"
-        style="background-image: url('{{ asset('storage/settings/header.png') }}');">
+        style="background-image: url('{{ asset('storage/settings/header.png') }}'); background-size: contain;">
         <!-- Header Content -->
         <div class="relative max-w-[1320px] mx-auto px-4 sm:px-6 py-8 md:py-12">
             <div class="flex flex-col md:flex-row items-center text-center md:text-left gap-4">
