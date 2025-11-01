@@ -2,114 +2,153 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
+use App\Filament\Resources\PageResource\Pages;
 use App\Models\Page;
-use Filament\Tables;
+use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
-use Filament\Actions\EditAction;
-use Filament\Resources\Resource;
-use Filament\Forms\Components\Toggle;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\Group;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use App\Filament\Resources\PageResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\PageResource\Pages\EditPage;
-use App\Filament\Resources\PageResource\Pages\ListPages;
-use App\Filament\Resources\PageResource\Pages\CreatePage;
-use App\Filament\Resources\PageResource\RelationManagers;
 
 class PageResource extends Resource
 {
     protected static ?string $model = Page::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
     protected static ?string $navigationGroup = 'Konten Utama';
-
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Group::make()
+                Forms\Components\Section::make('Informasi Halaman')
+                    ->description('Atur detail utama halaman seperti judul, menu, dan gambar.')
+                    ->icon('heroicon-o-document')
                     ->schema([
-                        Forms\Components\TextInput::make('title')
-                            ->label('Judul Halaman (Lengkap)')
-                            ->required()
-                            ->maxLength(255)
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('title')
+                                    ->label('Judul Halaman (Lengkap)')
+                                    ->placeholder('Masukkan judul halaman...')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) =>
+                                        $operation === 'create' ? $set('slug', Str::slug($state)) : null
+                                    ),
 
-                        Forms\Components\TextInput::make('menu_title')
-                            ->label('Judul Menu (Singkat)')
-                            ->required()
-                            ->maxLength(255),
+                                Forms\Components\TextInput::make('menu_title')
+                                    ->label('Judul Menu (Singkat)')
+                                    ->placeholder('Judul yang muncul di menu navigasi')
+                                    ->required()
+                                    ->maxLength(255),
+                            ]),
 
-                        Forms\Components\TextInput::make('slug')
-                            ->required()
-                            ->maxLength(255)
-                            ->disabled()
-                            ->dehydrated()
-                            ->unique(Page::class, 'slug', ignoreRecord: true),
+                        Forms\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\TextInput::make('slug')
+                                    ->label('Slug URL')
+                                    ->disabled()
+                                    ->dehydrated()
+                                    ->unique(Page::class, 'slug', ignoreRecord: true)
+                                    ->helperText('Otomatis dibuat dari judul halaman.')
+                                    ->columnSpan(2),
+
+                                Forms\Components\Toggle::make('is_featured')
+                                    ->label('Tampilkan di Halaman Depan')
+                                    ->onColor('success')
+                                    ->offColor('gray')
+                                    ->helperText('Aktifkan untuk menampilkan halaman ini di beranda.'),
+                            ]),
 
                         Forms\Components\FileUpload::make('image_url')
-                            ->label('Gambar Utama (Thumbnail)')
+                            ->label('Gambar Utama / Thumbnail')
                             ->image()
+                            ->imageEditor()
+                            ->imagePreviewHeight('200')
                             ->disk('public')
-                            ->directory('page-images'),
+                            ->directory('page-images')
+                            ->helperText('Gambar ini akan muncul sebagai thumbnail di daftar halaman.'),
+                    ])
+                    ->columns(2)
+                    ->collapsible(),
 
-                        Forms\Components\Toggle::make('is_featured')
-                            ->label('Tampilkan di Halaman Depan (Info Cards)')
-
-                    ])->columns(2),
-
-                Forms\Components\RichEditor::make('content')
-                    ->required()
-                    ->fileAttachmentsDisk('public')
-                    ->fileAttachmentsDirectory('page-content-images')
-                    ->columnSpanFull(),
+                Forms\Components\Section::make('Konten Halaman')
+                    ->description('Isi konten utama halaman di bawah ini.')
+                    ->icon('heroicon-o-pencil-square')
+                    ->schema([
+                        Forms\Components\RichEditor::make('content')
+                            ->label('Isi Konten')
+                            ->toolbarButtons([
+                                'bold', 'italic', 'underline', 'strike',
+                                'bulletList', 'orderedList', 'link', 'blockquote',
+                                'h2', 'h3', 'codeBlock', 'undo', 'redo',
+                            ])
+                            ->fileAttachmentsDisk('public')
+                            ->fileAttachmentsDirectory('page-content-images')
+                            ->required()
+                            ->columnSpanFull(),
+                    ])
+                    ->collapsible(),
             ]);
     }
 
     public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('title')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('menu_title'),
-                Tables\Columns\IconColumn::make('is_featured')
-                    ->label('Unggulan')
-                    ->boolean(),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
+{
+    return $table
+        ->columns([
+            Tables\Columns\ImageColumn::make('image_url')
+                ->label('Thumbnail')
+                ->disk('public')
+                ->square()
+                ->height(70)
+                ->extraAttributes(['class' => 'rounded-lg shadow-sm']),
+
+            Tables\Columns\TextColumn::make('title')
+                ->label('Judul Halaman')
+                ->weight('bold')
+                ->limit(50)
+                ->searchable()
+                ->sortable()
+                ->description(fn ($record) => $record->menu_title, position: 'below'),
+
+            Tables\Columns\IconColumn::make('is_featured')
+                ->label('Unggulan')
+                ->boolean()
+                ->trueIcon('heroicon-s-star')
+                ->falseIcon('heroicon-o-star')
+                ->trueColor('warning')
+                ->falseColor('gray'),
+
+            Tables\Columns\TextColumn::make('updated_at')
+                ->label('Diperbarui')
+                ->since()
+                ->sortable()
+                ->color('gray'),
+        ])
+        ->defaultSort('updated_at', 'desc')
+        ->filters([])
+        ->actions([
+            Tables\Actions\EditAction::make()
+                ->label('Edit')
+                ->icon('heroicon-o-pencil-square')
+                ->color('primary')
+                ->button(),
+        ])
+        ->bulkActions([
+            Tables\Actions\BulkActionGroup::make([
+                Tables\Actions\DeleteBulkAction::make(),
+            ]),
+        ])
+        ->striped() // Menambahkan efek zebra
+        ->paginated([10, 25, 50]); // Pagination modern
+}
+
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array

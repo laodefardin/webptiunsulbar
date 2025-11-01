@@ -38,82 +38,126 @@ class PostResource extends Resource
     protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('title')
-                    ->required()
-                    ->maxLength(255)
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
+{
+    return $form
+        ->schema([
+            Forms\Components\Grid::make(2)
+                ->schema([
+                    // 📄 KIRI — Informasi Utama
+                    Forms\Components\Section::make('Informasi Utama')
+                        ->description('Isi judul, slug, dan konten utama dari berita atau artikel.')
+                        ->icon('heroicon-o-newspaper')
+                        ->schema([
+                            Forms\Components\TextInput::make('title')
+                                ->label('Judul Berita')
+                                ->placeholder('Masukkan judul berita...')
+                                ->required()
+                                ->maxLength(255)
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) =>
+                                    $operation === 'create' ? $set('slug', Str::slug($state)) : null),
 
+                            Forms\Components\TextInput::make('slug')
+                                ->label('Slug URL')
+                                ->disabled()
+                                ->dehydrated()
+                                ->helperText('Slug akan otomatis dibuat dari judul.')
+                                ->unique(Post::class, 'slug', ignoreRecord: true),
 
-                Forms\Components\TextInput::make('slug')
-                    ->required()
-                    ->maxLength(255)
-                    ->disabled()
-                    ->dehydrated()
-                    ->unique(Post::class, 'slug', ignoreRecord: true),
+                            Forms\Components\RichEditor::make('content')
+                                ->label('Konten Berita')
+                                ->placeholder('Tulis isi berita di sini...')
+                                ->required()
+                                ->fileAttachmentsDisk('public')
+                                ->fileAttachmentsDirectory('post-content-images')
+                                ->toolbarButtons([
+                                    'bold', 'italic', 'underline', 'bulletList', 'orderedList', 'link', 'undo', 'redo',
+                                ])
+                                ->columnSpanFull(),
+                        ])
+                        ->columnSpan(1),
 
-                Forms\Components\RichEditor::make('content')
-                    ->required()
-                    ->fileAttachmentsDisk('public') // <-- TAMBAHKAN INI
-                    ->fileAttachmentsDirectory('post-content-images') // <-- DAN INI
-                    ->columnSpanFull(),
+                    // 🖼 KANAN — Detail & Gambar
+                    Forms\Components\Section::make('Detail Tambahan')
+                        ->description('Atur kategori, gambar utama, dan jadwal publikasi.')
+                        ->icon('heroicon-o-adjustments-horizontal')
+                        ->schema([
+                            Forms\Components\FileUpload::make('image_url')
+                                ->label('Gambar Utama')
+                                ->image()
+                                ->imageEditor()
+                                ->imagePreviewHeight('180')
+                                ->disk('public')
+                                ->directory('post-images')
+                                ->helperText('Gunakan gambar dengan rasio 16:9 untuk hasil terbaik.')
+                                ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/gif'])
+                                ->columnSpanFull(),
 
-                Forms\Components\FileUpload::make('image_url')
-                    ->label('Gambar Utama')
-                    ->image()
-                    ->disk('public')
-                    ->imageEditor() // Tambahkan ini jika ingin ada editor gambar
-                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/gif']) // Lebih spesifik
-                    ->directory('post-images'),
+                            Forms\Components\Select::make('category')
+                                ->label('Kategori')
+                                ->options([
+                                    'Berita Kampus' => 'Berita Kampus',
+                                    'Pengumuman' => 'Pengumuman',
+                                    'Prestasi' => 'Prestasi',
+                                ])
+                                ->native(false)
+                                ->searchable()
+                                ->required(),
 
-                Forms\Components\Select::make('category')
-                    ->options([
-                        'Berita Kampus' => 'Berita Kampus',
-                        'Pengumuman' => 'Pengumuman',
-                        'Prestasi' => 'Prestasi',
-                    ])
-                    ->required(),
+                            Forms\Components\DateTimePicker::make('published_at')
+                                ->label('Tanggal Publikasi')
+                                ->helperText('Waktu posting berita.')
+                                ->default(now()),
+                        ])
+                        ->columnSpan(1),
+                ])
+                ->columns(2),
+        ]);
+}
 
-                Forms\Components\DateTimePicker::make('published_at')
-                    ->label('Tanggal Publikasi')
-                    ->default(now()),
-            ]);
-    }
 
     public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                Tables\Columns\ImageColumn::make('image_url')
-                    ->label('Gambar')
-                    ->disk('public'),
-                Tables\Columns\TextColumn::make('title')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('category')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('published_at')
-                    ->label('Tanggal Publikasi')
-                    ->dateTime()
-                    ->sortable(),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
+{
+    return $table
+        ->columns([
+            Tables\Columns\ImageColumn::make('image_url')
+                ->label('Gambar')
+                ->disk('public')
+                ->height(60)
+                ->width(100)
+                ->extraAttributes(['class' => 'rounded-lg shadow-sm']),
+
+            Tables\Columns\TextColumn::make('title')
+                ->label('Judul')
+                ->weight('bold')
+                ->limit(60)
+                ->wrap()
+                ->searchable()
+                ->sortable()
+                ->description(fn ($record) => $record->category, position: 'below'),
+
+            Tables\Columns\TextColumn::make('published_at')
+                ->label('Diterbitkan')
+                ->dateTime('d M Y H:i')
+                ->sortable()
+                ->color('gray'),
+        ])
+        ->defaultSort('published_at', 'desc')
+        ->filters([])
+        ->actions([
+            Tables\Actions\EditAction::make()
+                ->label('Edit')
+                ->icon('heroicon-o-pencil-square')
+                ->color('primary'),
+            Tables\Actions\DeleteAction::make(),
+        ])
+        ->bulkActions([
+            Tables\Actions\BulkActionGroup::make([
+                Tables\Actions\DeleteBulkAction::make(),
+            ]),
+        ]);
+}
+
 
     public static function getRelations(): array
     {

@@ -26,59 +26,72 @@ class EventResource extends Resource
 {
     return $form
         ->schema([
-            Forms\Components\Section::make('Informasi Utama')
-                ->description('Isi informasi utama dari agenda kegiatan.')
-                ->icon('heroicon-o-calendar')
+            Forms\Components\Grid::make(2)
                 ->schema([
-                    Forms\Components\TextInput::make('title')
-                        ->label('Judul Event')
-                        ->placeholder('Masukkan judul event...')
-                        ->required()
-                        ->maxLength(255)
-                        ->columnSpanFull(),
-
-                    Forms\Components\RichEditor::make('description')
-                        ->label('Deskripsi')
-                        ->placeholder('Tulis deskripsi singkat kegiatan...')
-                        ->columnSpanFull(),
-                ])
-                ->columns(2),
-
-            Forms\Components\Section::make('Detail Agenda')
-                ->description('Atur waktu, lokasi, dan poster event.')
-                ->icon('heroicon-o-clock')
-                ->schema([
-                    Forms\Components\FileUpload::make('image_url')
-                        ->label('Poster / Gambar Event')
-                        ->image()
-                        ->imageEditor()
-                        ->imagePreviewHeight('180')
-                        ->disk('public')
-                        ->directory('event-images')
-                        ->columnSpanFull(),
-
-                    Forms\Components\Grid::make(2)
+                    // 🔹 Kiri: Informasi Event
+                    Forms\Components\Section::make('Informasi Utama')
+                        ->description('Isi informasi dasar kegiatan seperti judul dan deskripsi.')
+                        ->icon('heroicon-o-calendar')
                         ->schema([
-                            Forms\Components\DatePicker::make('event_date')
-                                ->label('Tanggal Event')
-                                ->required(),
+                            Forms\Components\TextInput::make('title')
+                                ->label('Judul Event')
+                                ->placeholder('Masukkan judul event...')
+                                ->required()
+                                ->maxLength(255),
 
-                            Forms\Components\TextInput::make('location')
-                                ->label('Lokasi Event')
-                                ->placeholder('Masukkan lokasi...')
-                                ->required(),
-                        ]),
+                            Forms\Components\RichEditor::make('description')
+                                ->label('Deskripsi Event')
+                                ->placeholder('Tuliskan deskripsi singkat kegiatan...')
+                                ->toolbarButtons([
+                                    'bold', 'italic', 'underline', 'bulletList', 'orderedList', 'link', 'undo', 'redo',
+                                ])
+                                ->columnSpanFull(),
+                        ])
+                        ->columnSpan(1),
 
-                    Forms\Components\Grid::make(2)
+                    // 🔹 Kanan: Detail & Gambar
+                    Forms\Components\Section::make('Detail Agenda')
+                        ->description('Atur poster, waktu, dan lokasi event di sini.')
+                        ->icon('heroicon-o-clock')
                         ->schema([
-                            Forms\Components\TimePicker::make('start_time')
-                                ->label('Waktu Mulai'),
+                            Forms\Components\FileUpload::make('image_url')
+                                ->label('Poster / Gambar Event')
+                                ->image()
+                                ->imageEditor()
+                                ->imagePreviewHeight('180')
+                                ->disk('public')
+                                ->directory('event-images')
+                                ->helperText('Upload poster dengan rasio 16:9 agar tampak proporsional.')
+                                ->columnSpanFull(),
 
-                            Forms\Components\TimePicker::make('end_time')
-                                ->label('Waktu Selesai'),
-                        ]),
+                            Forms\Components\Grid::make(2)
+                                ->schema([
+                                    Forms\Components\DatePicker::make('event_date')
+                                        ->label('Tanggal Event')
+                                        ->required(),
+
+                                    Forms\Components\TextInput::make('location')
+                                        ->label('Lokasi')
+                                        ->placeholder('Masukkan lokasi kegiatan...')
+                                        ->required(),
+                                ]),
+
+                            Forms\Components\Grid::make(2)
+                                ->schema([
+                                    Forms\Components\TimePicker::make('start_time')
+                                        ->label('Mulai')
+                                        ->seconds(false)
+                                        ->placeholder('08:00 AM'),
+
+                                    Forms\Components\TimePicker::make('end_time')
+                                        ->label('Selesai')
+                                        ->seconds(false)
+                                        ->placeholder('10:00 AM'),
+                                ]),
+                        ])
+                        ->columnSpan(1),
                 ])
-                ->columns(2),
+                ->columns(2), // Dua kolom besar: kiri & kanan
         ]);
 }
 

@@ -1,0 +1,70 @@
+/* Grid card look for PageResource */
+.fi-table > div {
+    display: grid !important;
+    gap: 1.5rem !important;
+}
+
+.fi-table .fi-ta-record {
+    border-radius: 1rem;
+    background: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    border: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+}
+
+.fi-table .fi-ta-record:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    transform: translateY(-2px);
+}
+
+/* Modern compact table look */
+.fi-ta-table {
+    border-radius: 1rem !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.fi-ta-row:hover {
+    background-color: #f9fafb !important;
+    transition: all 0.2s ease;
+}
+
+.fi-ta-cell img {
+    border-radius: 0.75rem;
+}
+
+.fi-ta-header-cell {
+    font-weight: 600 !important;
+    color: #374151 !important;
+}
+
+/* Modern Lecturer Form */
+.fi-section {
+    border-radius: 1rem;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f3f4f6;
+    transition: all 0.2s ease;
+}
+
+.fi-section:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.fi-section h2 {
+    font-weight: 600 !important;
+    color: #1f2937 !important;
+}
+
+/* Modern table look */
+.fi-ta-row:hover {
+    background-color: #f9fafb !important;
+    transition: all 0.2s ease;
+}
+
+.fi-ta-cell img {
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #e5e7eb;
+}
+
