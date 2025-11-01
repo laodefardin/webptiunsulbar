@@ -33,33 +33,33 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
+            ->path('admin')
             ->id('admin')
-            ->path('ptimanage')
             ->login()
             ->favicon(url('settings/01K6JA6M24GF5W0XHHP27Z1F17.png'))
             ->brandLogo(fn () => view('filament.admin.brand')) // <-- Menggunakan view kustom untuk logo
             ->brandName(fn () => view('filament.admin.brand-name')) // <-- Menggunakan view kustom untuk nama brand
             ->colors([
                 'primary' => [
-                    '50' => '#f3e6e6',
-                    '100' => '#e7cccc',
-                    '200' => '#dbb3b3',
-                    '300' => '#cf9999',
-                    '400' => '#c38080',
-                    '500' => '#b76666',
-                    '600' => '#ab4d4d',
-                    '700' => '#9f3333',
-                    '800' => '#931a1a',
-                    '900' => '#8b0000',
-                    '950' => '#4a0000',
+                    '50' => '#fef2f2',
+                    '100' => '#fee2e2',
+                    '200' => '#fecaca',
+                    '300' => '#fca5a5',
+                    '400' => '#f87171',
+                    '500' => '#ef4444',
+                    '600' => '#dc2626',
+                    '700' => '#b91c1c',
+                    '800' => '#991b1b',
+                    '900' => '#7f1d1d',
                 ],
             ])
             ->profile()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                \App\Filament\Pages\Dashboard::class,
             ])
+
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 // Widgets\AccountWidget::class,
