@@ -2,19 +2,14 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Pages;
 use Filament\Panel;
-use Filament\Widgets;
-use App\Models\Setting;
-use Filament\PanelProvider;
-use Filament\Pages\Dashboard;
 use Filament\Support\Colors\Color;
 use Hasnayeen\Themes\ThemesPlugin;
-use Filament\Widgets\AccountWidget;
+use App\Models\Setting;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Filament\Navigation\NavigationGroup;
-use Filament\Widgets\FilamentInfoWidget;
 use Filament\Http\Middleware\Authenticate;
 use Hasnayeen\Themes\Http\Middleware\SetTheme;
 use Illuminate\Session\Middleware\StartSession;
@@ -26,8 +21,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-
-use Illuminate\Contracts\Auth\Authenticatable;
+use Filament\PanelProvider;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -35,38 +29,20 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->path('admin')
             ->id('admin')
+            ->path('admin')
             ->login()
+            ->authGuard('web') // ✅ penting agar user dari guard web dikenali
             ->favicon(url('settings/01K6JA6M24GF5W0XHHP27Z1F17.png'))
-            ->brandLogo(fn () => view('filament.admin.brand')) // <-- Menggunakan view kustom untuk logo
-            ->brandName(fn () => view('filament.admin.brand-name')) // <-- Menggunakan view kustom untuk nama brand
+            ->brandLogo(fn() => view('filament.admin.brand'))
+            ->brandName(fn() => view('filament.admin.brand-name'))
             ->colors([
-                'primary' => [
-                    '50' => '#fef2f2',
-                    '100' => '#fee2e2',
-                    '200' => '#fecaca',
-                    '300' => '#fca5a5',
-                    '400' => '#f87171',
-                    '500' => '#ef4444',
-                    '600' => '#dc2626',
-                    '700' => '#b91c1c',
-                    '800' => '#991b1b',
-                    '900' => '#7f1d1d',
-                ],
+                'primary' => Color::Red, // warna tema utama
             ])
-            ->profile()
+            ->profile() // aktifkan profil user di sidebar
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
-            ->pages([
-                \App\Filament\Pages\Dashboard::class,
-            ])
-
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([
-                // Widgets\AccountWidget::class,
-                // Widgets\FilamentInfoWidget::class,
-            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -77,54 +53,46 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                SetTheme::class,
+                SetTheme::class, // pastikan ini di paling bawah
             ])
             ->authMiddleware([
                 Authenticate::class,
             ])
-
-            // Tambahkan blok kode ini untuk mengatur urutan grup navigasi
             ->navigationGroups([
                 NavigationGroup::make('Konten Utama')->label('Konten Utama'),
                 NavigationGroup::make('Struktur Website')->label('Struktur Website'),
                 NavigationGroup::make('Data Master')->label('Data Master'),
                 NavigationGroup::make('Pengaturan')->label('Pengaturan'),
             ])
-
-             ->plugin(
-            ThemesPlugin::make()
-            );
+            ->plugins([
+                ThemesPlugin::make(),
+            ]);
     }
 
-public function boot(): void
-{
-    // Mengirim data pengaturan ke view brand
-    try {
-        $settings = Setting::all()->pluck('value', 'key');
+    public function boot(): void
+    {
+        try {
+            $settings = Setting::all()->pluck('value', 'key');
 
-View::composer(['filament.admin.brand', 'filament.admin.brand-name'], function ($view) use ($settings) {
-    $logoPath = $settings['site_logo'] ?? null;
-    $view->with('logoUrl', $logoPath ? Storage::url($logoPath) : null);
-    $view->with('brandName', $settings['program_study_name'] ?? 'Admin Panel');
-});
-
-    } catch (\Exception $e) {
-        View::composer('filament.admin.brand', 'filament.admin.brand-name', function ($view) {
-            $view->with('logoUrl', null);
-            $view->with('brandName', 'Admin Panel');
-        });
+            View::composer(['filament.admin.brand', 'filament.admin.brand-name'], function ($view) use ($settings) {
+                $logoPath = $settings['site_logo'] ?? null;
+                $view->with('logoUrl', $logoPath ? Storage::url($logoPath) : null);
+                $view->with('brandName', $settings['program_study_name'] ?? 'Admin Panel');
+            });
+        } catch (\Exception $e) {
+            View::composer(['filament.admin.brand', 'filament.admin.brand-name'], function ($view) {
+                $view->with('logoUrl', null);
+                $view->with('brandName', 'Admin Panel');
+            });
+        }
     }
-}
 
+    public function canAccessPanel(Authenticatable $user): bool
+    {
+        // ✅ Untuk sekarang, izinkan semua user login mengakses panel admin
+        return true;
 
-public function canAccessPanel(Authenticatable $user): bool
-{
-    // Untuk sementara, izinkan semua user yang login mengakses panel admin
-    return true;
-
-    // Kalau mau lebih aman (hanya admin tertentu):
-    // return in_array($user->email, ['admin@ptiunsulbar.ac.id', 'superadmin@ptiunsulbar.ac.id']);
-}
-
-
+        // Contoh: batasi hanya user tertentu
+        // return in_array($user->email, ['admin@ptiunsulbar.ac.id']);
+    }
 }
