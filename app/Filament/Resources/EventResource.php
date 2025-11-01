@@ -23,29 +23,65 @@ class EventResource extends Resource
         protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('title')
-                    ->required()
-                    ->maxLength(255)
-                    ->columnSpanFull(),
-                Forms\Components\RichEditor::make('description')
-                    ->columnSpanFull(),
-                Forms\Components\FileUpload::make('image_url')
-                    ->label('Gambar/Poster Agenda')
-                    ->image()
-                    ->disk('public')
-                    ->directory('event-images'),
-                Forms\Components\DatePicker::make('event_date')
-                    ->required(),
-                Forms\Components\TimePicker::make('start_time'),
-                Forms\Components\TimePicker::make('end_time'),
-                Forms\Components\TextInput::make('location')
-                    ->required()
-                    ->maxLength(255),
-            ]);
-    }
+{
+    return $form
+        ->schema([
+            Forms\Components\Section::make('Informasi Utama')
+                ->description('Isi informasi utama dari agenda kegiatan.')
+                ->icon('heroicon-o-calendar')
+                ->schema([
+                    Forms\Components\TextInput::make('title')
+                        ->label('Judul Event')
+                        ->placeholder('Masukkan judul event...')
+                        ->required()
+                        ->maxLength(255)
+                        ->columnSpanFull(),
+
+                    Forms\Components\RichEditor::make('description')
+                        ->label('Deskripsi')
+                        ->placeholder('Tulis deskripsi singkat kegiatan...')
+                        ->columnSpanFull(),
+                ])
+                ->columns(2),
+
+            Forms\Components\Section::make('Detail Agenda')
+                ->description('Atur waktu, lokasi, dan poster event.')
+                ->icon('heroicon-o-clock')
+                ->schema([
+                    Forms\Components\FileUpload::make('image_url')
+                        ->label('Poster / Gambar Event')
+                        ->image()
+                        ->imageEditor()
+                        ->imagePreviewHeight('180')
+                        ->disk('public')
+                        ->directory('event-images')
+                        ->columnSpanFull(),
+
+                    Forms\Components\Grid::make(2)
+                        ->schema([
+                            Forms\Components\DatePicker::make('event_date')
+                                ->label('Tanggal Event')
+                                ->required(),
+
+                            Forms\Components\TextInput::make('location')
+                                ->label('Lokasi Event')
+                                ->placeholder('Masukkan lokasi...')
+                                ->required(),
+                        ]),
+
+                    Forms\Components\Grid::make(2)
+                        ->schema([
+                            Forms\Components\TimePicker::make('start_time')
+                                ->label('Waktu Mulai'),
+
+                            Forms\Components\TimePicker::make('end_time')
+                                ->label('Waktu Selesai'),
+                        ]),
+                ])
+                ->columns(2),
+        ]);
+}
+
 
     public static function table(Table $table): Table
     {
